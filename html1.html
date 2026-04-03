@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>واجهة دردشة المشاريع</title>
+  <style>
+    :root{
+      --text:#18304f;
+      --muted:#7e8fa8;
+      --line:rgba(255,255,255,.38);
+      --blue1:#1c63ff;
+      --blue2:#4fc3ff;
+      --bubble-ai:rgba(255,255,255,.88);
+      --bubble-user:linear-gradient(135deg,#1f57e7,#2da3ff);
+      --shadow:0 30px 80px rgba(11,34,78,.22);
+      --soft:0 12px 30px rgba(55,92,162,.15);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+
+    body{
+      margin:0;
+      font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+      color:var(--text);
+      overflow:hidden;
+      background:#dfe8f6;
+    }
+
+    .bg-video{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      z-index:-3;
+    }
+
+    .bg-overlay{
+      position:fixed;
+      inset:0;
+      z-index:-2;
+      background:
+        radial-gradient(700px 260px at 15% 10%, rgba(110,182,255,.22), transparent 60%),
+        radial-gradient(700px 280px at 85% 90%, rgba(0,123,255,.14), transparent 60%),
+        linear-gradient(180deg, rgba(235,242,252,.40), rgba(223,232,246,.62));
+      backdrop-filter:blur(3px);
+    }
+
+    .stage{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:28px;
+    }
+
+    .chat-shell{
+      position:relative;
+      width:min(1180px, calc(100vw - 56px));
+      height:min(900px, calc(100vh - 56px));
+      border-radius:34px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.35);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(14px);
+      padding:14px;
+    }
+
+    .chat-card{
+      height:100%;
+      border-radius:28px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      border:1px solid rgba(255,255,255,.45);
+      background:rgba(255,255,255,.100);
+      backdrop-filter:blur(22px);
+      box-shadow:0 20px 50px rgba(24,57,120,.16), inset 0 1px 0 rgba(255,255,255,.75);
+    }
+
+    .header{
+      background:linear-gradient(90deg, rgba(28,99,255,.95), rgba(79,195,255,.92));
+      color:#fff;
+      padding:18px 20px 16px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      box-shadow:inset 0 -1px 0 rgba(255,255,255,.16);
+    }
+
+    .avatar{
+      width:58px;height:58px;border-radius:50%;
+      background:linear-gradient(145deg,#ffffff,#dfe8ff);
+      display:grid;place-items:center;
+      color:#2b5dff;font-weight:800;font-size:18px;
+      box-shadow:0 8px 22px rgba(0,0,0,.14);
+      flex:0 0 auto;
+    }
+
+    .head-copy h1{
+      margin:0;
+      font-size:20px;
+      line-height:1.2;
+      font-weight:800;
+    }
+
+    .head-copy p{
+      margin:6px 0 0;
+      font-size:13px;
+      opacity:.94;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .dot{
+      width:12px;height:12px;border-radius:50%;
+      background:#48ea48;
+      box-shadow:0 0 0 4px rgba(72,234,72,.20);
+      display:inline-block;
+      flex:0 0 auto;
+    }
+
+    .messages{
+      flex:1;
+      overflow:auto;
+      padding:18px 18px 12px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08)),
+        rgba(255,255,255,.10);
+      scroll-behavior:smooth;
+    }
+
+    .messages::-webkit-scrollbar{width:8px}
+    .messages::-webkit-scrollbar-thumb{background:rgba(161,182,220,.7);border-radius:20px}
+    .messages::-webkit-scrollbar-track{background:transparent}
+
+    .system-note{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#5d6f8c;
+      font-size:13px;
+      padding:4px 4px 16px;
+    }
+
+    .mini-avatar{
+      width:30px;height:30px;border-radius:50%;
+      background:rgba(238,244,255,.92);
+      color:#2b7cff;
+      display:grid;place-items:center;
+      font-size:12px;font-weight:800;
+      border:1px solid #dfe9ff;
+      flex:0 0 auto;
+      box-shadow:0 6px 16px rgba(39,91,190,.10);
+    }
+
+    .row{
+      display:flex;
+      margin:12px 0;
+      align-items:flex-end;
+      gap:10px;
+      animation:rise .28s ease;
+    }
+
+    .row.ai{justify-content:flex-start}
+    .row.user{justify-content:flex-end}
+
+    .bubble{
+      max-width:min(78%, 760px);
+      padding:14px 16px;
+      border-radius:20px;
+      font-size:15px;
+      line-height:1.8;
+      box-shadow:var(--soft);
+      word-wrap:break-word;
+      white-space:pre-wrap;
+      position:relative;
+    }
+
+    .row.ai .bubble{
+      background:var(--bubble-ai);
+      border:1px solid rgba(226,234,247,.92);
+      color:var(--text);
+      border-bottom-right-radius:8px;
+      backdrop-filter:blur(10px);
+    }
+
+    .row.user .bubble{
+      background:var(--bubble-user);
+      color:#fff;
+      border-bottom-left-radius:8px;
+      box-shadow:0 14px 32px rgba(43,124,255,.28);
+    }
+
+    .typing{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      min-width:58px;
+      padding:14px 16px;
+    }
+
+    .typing span{
+      width:8px;height:8px;border-radius:50%;
+      background:#8fa7d6;
+      animation:bounce 1s infinite ease-in-out;
+      opacity:.7;
+    }
+
+    .typing span:nth-child(2){animation-delay:.15s}
+    .typing span:nth-child(3){animation-delay:.3s}
+
+    .action-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:220px;
+      padding:12px 16px;
+      border-radius:16px;
+      text-decoration:none;
+      font-size:14px;
+      font-weight:700;
+      color:#fff;
+      background:linear-gradient(135deg,#1f57e7,#2da3ff);
+      box-shadow:0 10px 24px rgba(43,124,255,.25);
+      transition:.18s ease;
+    }
+
+    .action-link:hover{
+      transform:translateY(-1px);
+    }
+
+    .composer-wrap{
+      padding:12px 16px 16px;
+      border-top:1px solid rgba(255,255,255,.38);
+      background:linear-gradient(180deg,rgba(255,255,255,.20),rgba(255,255,255,.30));
+      position:relative;
+      backdrop-filter:blur(10px);
+    }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      padding:0 2px 12px;
+      max-height:86px;
+      overflow:auto;
+    }
+
+    .chips::-webkit-scrollbar{height:6px;width:6px}
+    .chips::-webkit-scrollbar-thumb{background:#d9e2f3;border-radius:99px}
+
+    .chip{
+      border:none;
+      background:rgba(255,255,255,.72);
+      color:#2f4c77;
+      padding:10px 13px;
+      border-radius:999px;
+      font-size:13px;
+      cursor:pointer;
+      transition:.2s ease;
+      box-shadow:inset 0 0 0 1px rgba(214,226,246,.95), 0 6px 16px rgba(56,92,156,.08);
+      backdrop-filter:blur(8px);
+    }
+
+    .chip:hover{
+      transform:translateY(-1px);
+      background:#f6faff;
+    }
+
+    .suggestions{
+      position:absolute;
+      left:16px; right:16px;
+      bottom:88px;
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(230,237,249,.96);
+      border-radius:22px;
+      box-shadow:0 20px 45px rgba(51,78,128,.16);
+      backdrop-filter:blur(14px);
+      overflow:hidden;
+      display:none;
+      max-height:240px;
+    }
+
+    .suggestion{
+      width:100%;
+      text-align:right;
+      border:none;
+      background:transparent;
+      padding:13px 16px;
+      cursor:pointer;
+      color:#314767;
+      font-size:14px;
+      border-bottom:1px solid #f0f4fb;
+      transition:.18s ease;
+    }
+
+    .suggestion:last-child{border-bottom:none}
+
+    .suggestion:hover{
+      background:#f5f9ff;
+      color:#1d58e7;
+    }
+
+    .composer{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(245,248,253,.78);
+      border-radius:20px;
+      padding:10px 10px 10px 14px;
+      box-shadow:inset 0 0 0 1px rgba(232,238,248,.95);
+      backdrop-filter:blur(10px);
+    }
+
+    .composer input{
+      flex:1;
+      border:none;
+      outline:none;
+      background:transparent;
+      color:var(--text);
+      font-size:16px;
+      padding:6px 4px;
+    }
+
+    .composer input::placeholder{color:#7c90aa}
+
+    .send{
+      border:none;
+      width:48px;height:48px;
+      border-radius:16px;
+      background:linear-gradient(135deg,#215be8,#32a0ff);
+      color:#fff;
+      cursor:pointer;
+      font-size:18px;
+      box-shadow:0 10px 24px rgba(43,124,255,.28);
+      transition:.18s ease;
+      flex:0 0 auto;
+    }
+
+    .send:hover{transform:translateY(-1px) scale(1.02)}
+    .send:active{transform:scale(.98)}
+
+    .footer-note{
+      text-align:center;
+      color:#5c6f8e;
+      font-size:12px;
+      padding-top:10px;
+      user-select:none;
+    }
+
+    @keyframes bounce{
+      0%,80%,100%{transform:translateY(0);opacity:.45}
+      40%{transform:translateY(-6px);opacity:1}
+    }
+
+    @keyframes rise{
+      from{opacity:0;transform:translateY(10px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    @media (max-width:900px){
+      .stage{padding:14px}
+      .chat-shell{
+        width:calc(100vw - 28px);
+        height:calc(100vh - 28px);
+        border-radius:26px;
+        padding:10px;
+      }
+      .chat-card{border-radius:22px}
+      .bubble{max-width:88%}
+    }
+
+    @media (max-width:560px){
+      .stage{padding:8px}
+      .chat-shell{
+        width:calc(100vw - 16px);
+        height:calc(100vh - 16px);
+        border-radius:22px;
+        padding:8px;
+      }
+      .chat-card{border-radius:18px}
+      .header{padding:16px 14px}
+      .head-copy h1{font-size:18px}
+      .bubble{max-width:90%}
+    }
+  </style>
+</head>
+<body>
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="2.mp4" type="video/mp4" />
+  </video>
+  <div class="bg-overlay"></div>
+
+  <div class="stage">
+    <div class="chat-shell">
+      <div class="chat-card">
+        <div class="header">
+          <div class="avatar">AI</div>
+          <div class="head-copy">
+            <h1>كيف نكدر نساعدك؟</h1>
+            <p><span class="dot"></span> دردشة الكترونية لمساعدتك على تشغيل مشروعك باسرع وقت ممكن</p>
+          </div>
+        </div>
+
+        <div class="messages" id="messages">
+          <div class="system-note">
+            <div class="mini-avatar">AI</div>
+            <div>المساعد جاهز الآن</div>
+          </div>
+        </div>
+
+        <div class="composer-wrap">
+          <div class="chips" id="quickChips"></div>
+
+          <div class="suggestions" id="suggestions"></div>
+
+          <div class="composer">
+            <button class="send" id="sendBtn" title="إرسال">➤</button>
+            <input id="promptInput" type="text" autocomplete="off" placeholder="اكتب سؤالك هنا" />
+          </div>
+
+          <div class="footer-note">HTML Offline Chat</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const INSTAGRAM_URL = "https://www.instagram.com/iraq_project/";
+
+const KB = [
+  {
+    q:"التواصل مع الصفحة",
+    aliases:["تواصل","تواصل مع المشروع","انستغرام","انستا","instagram","صفحة الانستغرام","رابط الصفحة"],
+    a:"هذا رابط التواصل الرسمي مع الصفحة."
+  },
+  {
+    q:"شلون يشتغل المشروع؟",
+    aliases:["طريقة تشغيل المشروع","كيف يعمل المشروع","بداية تشغيل المشروع","step by step"],
+    a:"غالباً تشغل المشروع من USB أو من مصدر 5V مناسب، وبعد الإقلاع يبث شبكة Wi-Fi خاصة به. اتصل على الشبكة، وبعدها افتح المتصفح واكتب 192.168.4.1 حتى تظهر الواجهة."
+  },
+  {
+    q:"شنو اسم شبكة الواي فاي؟",
+    aliases:["اسم الشبكة","ssid","wifi name","اسم الwifi"],
+    a:"اسم الشبكة يتحدد داخل الكود، وغالباً يكون باسم المشروع نفسه مثل project أو أي اسم مخصص. إذا تريد اسم دقيق لمشروعك، افتح إعدادات الـ SSID داخل الكود أو اسألني باسم المشروع."
+  },
+  {
+    q:"شنو الباسورد الافتراضي؟",
+    aliases:["باسورد الواي فاي","wifi password","password","كلمة السر"],
+    a:"إذا المشروع مفعّل عليه باسورد فغالباً يكون 12345678 إلا إذا تغيّر داخل الكود. بعض المشاريع تكون مفتوحة بدون كلمة مرور."
+  },
+  {
+    q:"شنو الـ IP مال الواجهة؟",
+    aliases:["ip","عنوان الدخول","رابط المشروع","192.168.4.1"],
+    a:"في مشاريع الـ ESP8266 وNodeMCU وWemos التي تبث Access Point، العنوان الأكثر شيوعاً هو 192.168.4.1. تكتبه بالمتصفح بعد الاتصال على الشبكة."
+  },
+  {
+    q:"شلون أفحص المشروع بسرعة؟",
+    aliases:["فحص سريع","اختبار سريع","quick test","test project"],
+    a:"أول فحص: تأكد أن اللوحة تشتغل، الشبكة ظهرت، الهاتف اتصل عليها، والواجهة فتحت على 192.168.4.1. بعدها جرّب زر أو حساس واحد فقط حتى تتأكد أن المسار الأساسي يعمل."
+  },
+  {
+    q:"المشروع ما يبث شبكة Wi-Fi",
+    aliases:["الواي فاي ما يظهر","الشبكة ما تطلع","ssid not showing","wifi not showing"],
+    a:"افحص التغذية أولاً، ثم تأكد أن الكود فعلاً يشغّل وضع Access Point، وأن اللوحة أقلعت بدون إعادة تشغيل مستمرة. إذا تستخدم USB ضعيف أو كابل شحن رديء فقد يشتغل البورد بدون أن يبث الشبكة بشكل صحيح."
+  },
+  {
+    q:"192.168.4.1 ما يفتح",
+    aliases:["الواجهة ما تفتح","ip ما يفتح","صفحة المشروع ما تفتح","browser cannot open"],
+    a:"تأكد أولاً أنك متصل على شبكة المشروع نفسها وليس على الإنترنت العادي. بعدها افتح المتصفح واكتب 192.168.4.1 فقط بدون https. إذا بقي لا يعمل فغالباً السيرفر لم يبدأ أو اللوحة دخلت في إعادة تشغيل."
+  },
+  {
+    q:"شلون أوصل NodeMCU على الحاسبة؟",
+    aliases:["ربط nodemcu","usb nodemcu","وصل اللوحة بالحاسبة"],
+    a:"تستخدم كيبل USB Data وليس شحن فقط. بعد الربط، إذا احتجت مراقبة القيم افتح Serial Monitor واختر السرعة المناسبة الموجودة في الكود."
+  },
+  {
+    q:"شنو الفرق بين NodeMCU و Wemos D1 Mini؟",
+    aliases:["wemos nodemcu difference","الفرق بين ويموس ونود ام سي يو"],
+    a:"الاثنان غالباً يعتمدان على ESP8266، لكن NodeMCU أكبر حجماً ومنافذه أوضح، بينما Wemos D1 Mini أصغر وأسهل داخل المشاريع الصغيرة. من ناحية الفكرة البرمجية فهما قريبان جداً."
+  },
+  {
+    q:"شلون أفحص MQ-135؟",
+    aliases:["mq135","فحص حساس تلوث الهواء","air quality sensor","تلوث الهواء"],
+    a:"وصل AO إلى A0 في Wemos أو NodeMCU، ثم اقرأ القيمة التناظرية. إذا كانت القيمة دائماً صفر أو ثابتة جداً، افحص التوصيل، وامنح الحساس وقت تسخين كافٍ لأن حساسات MQ تحتاج استقرار قبل الحكم على القراءة."
+  },
+  {
+    q:"ليش MQ-135 يطلع 0%؟",
+    aliases:["mq135 zero","0 percent","air quality zero"],
+    a:"غالباً لأن المعادلة أو التحويل إلى نسبة مئوية غير مضبوط، أو لأنك تستخدم خرجاً رقمياً بدل التناظري. افحص القيمة الخام من A0 أولاً، وبعدها حوّلها إلى نسبة."
+  },
+  {
+    q:"شلون أفحص MQ-2؟",
+    aliases:["mq2","فحص حساس الغاز","gas sensor"],
+    a:"اقرأ A0 للقيمة المتغيرة، وجرّب تقريب مصدر غاز بشكل آمن جداً ولمدة قصيرة. إذا أردت إنذاراً سريعاً استخدم أيضاً DO مع عتبة المضبوط الموجودة على البورد نفسه."
+  },
+  {
+    q:"شلون أفحص Flame Sensor؟",
+    aliases:["flame sensor","فحص حساس اللهب","حساس الحريق"],
+    a:"يمكنك قراءة A0 أو الإشارة الرقمية حسب نوع البورد. جرّب مصدر لهب صغير وآمن على مسافة مناسبة، وإذا لم تتغير القراءة فافحص الاتجاه لأن حساس اللهب يتأثر بالزاوية."
+  },
+  {
+    q:"شلون أفحص MAX30100؟",
+    aliases:["max30100","فحص نبض","pulse sensor","spo2"],
+    a:"ثبت الإصبع جيداً على الحساس، وقلّل الحركة، وتأكد من أن التغذية مستقرة. إذا لم تظهر نبضات فغالباً الاتصال I2C أو وضع الإصبع أو جودة الحساس هي السبب."
+  },
+  {
+    q:"شلون أفحص الريلي؟",
+    aliases:["relay test","فحص relay","الريلي ما يشتغل"],
+    a:"جرّب كود بسيط يشغل ويطفئ المنفذ كل ثانية. إذا بقي الريلي معكوساً فغالباً هو Active LOW وليس Active HIGH، لذلك قد يحتاج LOW للتشغيل بدلاً من HIGH."
+  },
+  {
+    q:"الريلي يشتغل بالعكس",
+    aliases:["active low","relay inverted","معكوس"],
+    a:"هذا يعني أن الموديول غالباً Active LOW. بدل أن تعتبر HIGH تشغيل، اعتمد LOW تشغيل وHIGH إطفاء، أو أضف متغير داخل الكود يعكس المنطق."
+  },
+  {
+    q:"شلون أفحص البازر؟",
+    aliases:["buzzer test","فحص الجرس","passive buzzer","active buzzer"],
+    a:"إذا كان البازر Active يكفي HIGH وLOW. إذا كان Passive فيحتاج tone أو PWM حتى يصدر نغمة واضحة، لأن تشغيله مباشرة قد يعطي صوتاً ضعيفاً أو غير مستمر."
+  },
+  {
+    q:"شلون أسوي صوت جرس مدرسة؟",
+    aliases:["school bell","صوت جرس","bell sound"],
+    a:"للبازر Passive تحتاج تردد ثابت أو متكرر قريب من الجرس، ويمكنك عمل نبضات سريعة داخل مدة محددة. إذا أردت صوتاً أقرب للواقع فاستخدم سماعة أو ملف صوت بدلاً من البازر البسيط."
+  },
+  {
+    q:"شلون أفحص السيرفو MG995 أو MG90S؟",
+    aliases:["servo test","فحص servo","mg995","mg90s"],
+    a:"استخدم كود تحريك بسيط بين زاويتين مثل 0 و90 و180. إذا السيرفو يرجف أو يفصل فالمشكلة غالباً من التغذية لأن السيرفو يحتاج تياراً أعلى من الذي يقدمه USB أحياناً."
+  },
+  {
+    q:"السيرفو يرجف أو يتحرك غلط",
+    aliases:["servo jitter","يرتعش السيرفو","servo problem"],
+    a:"أكثر سبب شائع هو ضعف مزود الطاقة أو عدم توحيد الأرضي GND بين المصدر واللوحة. أيضاً بعض الإشارات تصبح غير مستقرة إذا كان السلك طويلاً أو قريباً من تشويش."
+  },
+  {
+    q:"شلون أفحص شاشة ILI9341؟",
+    aliases:["ili9341","فحص شاشة tft","tft screen"],
+    a:"ابدأ بكود اختبار ألوان بسيط. إذا الشاشة بيضاء أو سوداء فقط، فغالباً ترتيب التوصيل SPI أو تعريف الدرايفر أو أسلاك CS/DC/RST غير صحيحة."
+  },
+  {
+    q:"شلون أفحص PZEM-004T v3؟",
+    aliases:["pzem","فحص عداد الطاقة","power meter"],
+    a:"تأكد من توصيل TX/RX بشكل صحيح وبنفس الفولتية المنطقية، وبعدها اقرأ الفولت والتيار والقدرة. إذا لا توجد قراءات فغالباً مشكلة في الـ SoftwareSerial أو الأسلاك أو عدم وجود حمل كهربائي فعلي."
+  },
+  {
+    q:"شلون أفحص HC-SR04 أو ultrasonic؟",
+    aliases:["ultrasonic","distance sensor","hcsr04","فحص حساس المسافة"],
+    a:"اعرض المسافة على السيريال وقرّب جسماً أمام الحساس. إذا القيم ثابتة أو عشوائية فافحص Echo/Trig، وبعض لوحات 3.3V تحتاج انتباهاً خاصاً لإشارة Echo."
+  },
+  {
+    q:"شلون أفحص DS18B20؟",
+    aliases:["ds18b20","فحص حساس الحرارة السلكي","temperature probe"],
+    a:"تأكد من وجود مقاومة سحب Pull-up غالباً 4.7K بين البيانات والفولت. بدونها قد لا يظهر الحساس أو تظهر قراءات غير منطقية."
+  },
+  {
+    q:"ليش القراءات تطلع ثابتة؟",
+    aliases:["readings fixed","القيم ثابتة","sensor stuck"],
+    a:"إما أن الحساس غير موصول بشكل صحيح، أو أنك تقرأ منفذاً خاطئاً، أو أنك تعرض آخر قيمة محفوظة بدل القراءة الجديدة. افحص القراءة الخام والسيريال أولاً."
+  },
+  {
+    q:"ليش القراءات تطلع NaN؟",
+    aliases:["nan","not a number","القيمة nan"],
+    a:"هذه تظهر غالباً مع حساسات مثل DHT عند فشل القراءة. السبب المعتاد هو التوصيل أو التغذية أو أن الفاصل بين القراءات قصير جداً."
+  },
+  {
+    q:"شلون أغيّر اسم الشبكة والباسورد؟",
+    aliases:["change ssid","change password","تغيير اسم الشبكة","تغيير الباسورد"],
+    a:"غيّر سطر تعريف الـ SSID والـ password داخل الكود، ثم ارفع الكود من جديد على اللوحة. بعد إعادة التشغيل ستظهر الشبكة الجديدة."
+  },
+  {
+    q:"شلون أخزن الإعدادات حتى تبقى بعد انطفاء الكهرباء؟",
+    aliases:["save settings","eeprom","localstorage","حفظ الإعدادات"],
+    a:"في مشاريع ESP يتم التخزين غالباً داخل EEPROM أو Preferences حسب المنصة. في ملفات HTML المحلية يتم الحفظ عادةً عبر localStorage داخل المتصفح."
+  },
+  {
+    q:"المشروع يشتغل على الموبايل؟",
+    aliases:["phone","mobile","الجوال","يفتح من الهاتف"],
+    a:"نعم، إذا المشروع يبث Access Point أو موجود على نفس الشبكة، يكفي أن تتصل من الموبايل وتفتح 192.168.4.1 أو عنوان السيرفر المحلي المخصص له."
+  },
+  {
+    q:"شلون أفتح المشروع من غير جهاز؟",
+    aliases:["another device","جهاز ثاني","شبكة ثانية"],
+    a:"إذا كان المشروع AP فالجهاز الثاني يتصل مباشرة على شبكة اللوحة. وإذا كان المشروع Local Server على الحاسبة، يجب أن يكون الجهاز الثاني على نفس الشبكة وتفتح عنوان الـ IP الخاص بالحاسبة."
+  },
+  {
+    q:"شنو الفرق بين Access Point و Local Server؟",
+    aliases:["ap vs local server","فرق ap","server difference"],
+    a:"Access Point يعني اللوحة نفسها تبث شبكة وتستضيف الصفحة. Local Server يعني الحاسبة هي التي تشغّل السيرفر والصفحة، بينما الأجهزة الأخرى تدخل عليه عبر IP الحاسبة."
+  },
+  {
+    q:"شلون أستخدم RUN.bat؟",
+    aliases:["run bat","ملف تشغيل","bat file"],
+    a:"اضغط على RUN.bat مرتين. إذا كان المشروع يحتاج Python أو مكتبات، فالملف غالباً يفحصها ويشغّل السيرفر تلقائياً، ثم يفتح الصفحة أو يطبع الرابط."
+  },
+  {
+    q:"Python مو منصب، شسوي؟",
+    aliases:["python not installed","بايثون غير موجود","python path"],
+    a:"ثبت Python 3.10 أو أحدث، وفعّل خيار Add Python to PATH أثناء التثبيت. بعدها شغّل RUN.bat مرة ثانية."
+  },
+  {
+    q:"Node.js مو منصب، شسوي؟",
+    aliases:["node not installed","nodejs missing"],
+    a:"ثبت Node.js إصدار حديث، ثم افتح نافذة جديدة وأعد تشغيل ملف المشروع. إذا بقي لا يتعرف عليه، افحص أمر node -v داخل CMD."
+  },
+  {
+    q:"الواجهة HTML وحدها تشتغل لو تحتاج سيرفر؟",
+    aliases:["html only","direct html","هل يحتاج سيرفر"],
+    a:"إذا الملف يعتمد فقط على HTML/CSS/JS محلي، فهو يشتغل مباشرة بالنقر عليه. أما إذا يوجد رفع ملفات أو API أو قاعدة بيانات أو كاميرا متقدمة، فبعض الميزات قد تحتاج سيرفر."
+  },
+  {
+    q:"شلون أرفع الكود على ESP8266؟",
+    aliases:["upload esp8266","رفع الكود","arduino ide upload"],
+    a:"اختَر لوحة ESP8266 الصحيحة من Arduino IDE وحدد منفذ COM ثم ارفع الكود. إذا فشل الرفع افحص الكيبل والدرايفر والمنفذ."
+  },
+  {
+    q:"شنو أفضل سرعة للـ Serial Monitor؟",
+    aliases:["baud rate","serial speed","سرعة السيريال"],
+    a:"السرعة يجب أن تطابق المكتوب داخل Serial.begin في الكود، والأشهر 9600 أو 115200. إذا ظهر كلام غير مفهوم فغالباً اخترت سرعة خاطئة."
+  },
+  {
+    q:"المشروع يعيد تشغيل نفسه",
+    aliases:["restart loop","reboot","boot loop","يعيد التشغيل"],
+    a:"أكثر الأسباب شيوعاً: ضعف تغذية أو حمل زائد على اللوحة أو توصيل خاطئ أو خطأ برمجي يسبب reset. افصل الملحقات أولاً وجرّب اللوحة وحدها."
+  },
+  {
+    q:"شلون أفحص إذا الواير USB Data لو شحن فقط؟",
+    aliases:["usb cable","data cable","كيبل data"],
+    a:"إذا ربطت اللوحة ولم يظهر منفذ COM غالباً الكيبل شحن فقط أو تالف. جرّب نفس الكيبل مع نقل ملفات على جهاز آخر أو استبدله بكيبل Data معروف."
+  },
+  {
+    q:"شنو أفضل تغذية للمشروع؟",
+    aliases:["power supply","مزود الطاقة","5v supply"],
+    a:"يعتمد على القطع، لكن أغلب لوحات ESP تحتاج 5V مستقر من USB أو مزود جيد، بينما الريليات والسيرفو والبازر القوي قد تحتاج مزوداً منفصلاً مع GND مشترك."
+  },
+  {
+    q:"شلون أوصل الريلي ويا السيرفو ويا البورد بأمان؟",
+    aliases:["gnd common","common ground","توصيل آمن"],
+    a:"اجعل الأرضي GND مشتركاً بين المصادر عندما تحتاج تحكم بالإشارة، لكن لا تحمّل البورد تيار السيرفو أو الأحمال الكبيرة مباشرة. استخدم مزوداً منفصلاً للأحمال العالية."
+  },
+  {
+    q:"شلون أختبر المشروع قبل التسليم؟",
+    aliases:["before delivery","اختبار نهائي","final test"],
+    a:"اختبر التشغيل من الصفر: طاقة، ظهور الشبكة، فتح الواجهة، عمل الأزرار، ظهور القراءات، ثم أعد تشغيل الكهرباء وتأكد أن الإعدادات محفوظة وأن المشروع يعود للعمل بشكل طبيعي."
+  },
+  {
+    q:"شلون أفحص واجهة الريلي 4 قنوات؟",
+    aliases:["4 channel relay","relay 4ch","ريلي 4 قنوات"],
+    a:"جرّب تشغيل كل قناة بزر مستقل وتأكد أن كل منفذ مرتبط بالقناة الصحيحة. إذا قناة تشتغل بدلاً من أخرى فالمشكلة عادة من ترتيب المنافذ داخل الكود."
+  },
+  {
+    q:"شلون أعرف المنفذ الصحيح D1 D2 D5؟",
+    aliases:["pins","pinout","منافذ nodemcu","pin mapping"],
+    a:"في NodeMCU الأسماء D0..D8 هي أسماء اللوحة وليست أرقام GPIO الحقيقية دائماً. افحص الـ pin mapping داخل نوع البورد لتعرف أن D5 مثلاً يطابق GPIO14 في الغالب."
+  },
+  {
+    q:"شنو السبب إذا الحساس يشتغل على السيريال وما يطلع بالواجهة؟",
+    aliases:["serial works but ui not","القيمة بالسيريال فقط","الواجهة ما تحدث"],
+    a:"المشكلة غالباً ليست بالحساس بل بإرسال البيانات إلى الصفحة أو بتحديث JavaScript. افحص هل السيرفر يعيد قيمة جديدة وهل الصفحة تقرأها دورياً."
+  },
+  {
+    q:"شلون أفحص إذا الصفحة تتحدث مباشرة؟",
+    aliases:["live update","real time","التحديث المباشر"],
+    a:"غيّر قيمة واضحة مثل تشغيل زر أو تقريب جسم من الحساس ثم راقب هل الرقم يتغير فوراً. إذا لا، فغالباً زمن التحديث طويل أو طلبات fetch لا تعمل."
+  },
+  {
+    q:"أريد أستخدم المشروع بدون إنترنت",
+    aliases:["offline","بدون نت","no internet"],
+    a:"هذا ممكن جداً إذا كان المشروع Access Point أو HTML محلي أو سيرفر محلي داخل الحاسبة. المهم أن الأجهزة تكون على نفس الشبكة أو على شبكة اللوحة نفسها."
+  },
+  {
+    q:"شلون أزيد عدد المستخدمين؟",
+    aliases:["more users","عدد المستخدمين","كم مستخدم"],
+    a:"إذا المشروع على ESP مباشرة فعدد المستخدمين العملي محدود ويعتمد على الذاكرة والأداء. إذا تريد عدداً أكبر، الأفضل نقل الواجهة أو المنطق إلى Local Server على حاسبة أقوى."
+  },
+  {
+    q:"شلون أعرف المشروع يحتاج HTTPS لو لا؟",
+    aliases:["https","camera permission","microphone permission"],
+    a:"إذا المشروع يستخدم كاميرا أو مايكروفون في المتصفح فغالباً تحتاج HTTPS أو localhost حتى تمنح بعض المتصفحات صلاحية الوصول. أما المشاريع البسيطة فيكفي HTTP محلي."
+  },
+  {
+    q:"شلون أخلي الإعدادات تنحفظ في HTML؟",
+    aliases:["localstorage","save in browser","html settings"],
+    a:"استخدم localStorage في JavaScript لحفظ القيم مثل الأسماء أو الأسئلة أو آخر محادثة. عند فتح الصفحة مرة ثانية اقرأ القيم من localStorage وأعد عرضها."
+  },
+  {
+    q:"شلون أسوي اقتراحات أسئلة أثناء الكتابة؟",
+    aliases:["autocomplete","suggestions","اقتراحات","similar questions"],
+    a:"الفكرة أن تقارن النص المكتوب مع قائمة أسئلة مخزنة مسبقاً ثم تعرض الأقرب داخل قائمة منسدلة. كلما كتب المستخدم حرفاً جديداً تتحدث القائمة مباشرة."
+  },
+  {
+    q:"شلون أسوي بحث داخل قاعدة الأسئلة؟",
+    aliases:["faq search","knowledge base search","قاعدة المعرفة"],
+    a:"خزن الأسئلة والأجوبة داخل مصفوفة ثم طبّق مقارنة بالكلمات أو بالعبارات المشابهة. بعدها اختر أعلى نتيجة وأعد جوابها للمستخدم."
+  },
+  {
+    q:"شلون أخلي الرد يطلع مثل ChatGPT؟",
+    aliases:["typing effect","animated reply","شكل chatgpt"],
+    a:"استخدم فقاعة رد مع تأثير Typing قصير وبعدها اعرض الجواب بشكل متدرج حرفاً بعد حرف أو كلمة بعد كلمة. هذا يعطي إحساساً حيوياً مع بقاء النظام أوفلاين."
+  },
+  {
+    q:"المشروع ما يقرأ من A0 بشكل صحيح",
+    aliases:["a0 issue","analog read wrong","مشكلة analog"],
+    a:"تأكد من حدود الفولت المقبولة على A0 في لوحتك لأن بعض اللوحات لا تتحمل 5V مباشرة على المدخل التناظري. أيضاً افحص هل الحساس فعلاً يخرج Analog وليس Digital."
+  },
+  {
+    q:"ليش البورد ما يظهر COM؟",
+    aliases:["com port missing","usb driver","المنفذ ما يظهر"],
+    a:"إما الكيبل ليس Data أو الدرايفر غير مثبت مثل CH340 أو CP210x أو المنفذ تالف. جرّب منفذ USB آخر وكابل آخر قبل أي شيء."
+  },
+  {
+    q:"شنو CH340؟",
+    aliases:["ch340 driver","درايفر usb","driver"],
+    a:"هو شريحة USB-to-Serial موجودة على كثير من البوردات الرخيصة. إذا لم تكن معرفة في النظام فلن يظهر منفذ COM عند ربط اللوحة."
+  },
+  {
+    q:"شلون أعرف المشكلة من الكود أو من الهاردوير؟",
+    aliases:["hardware or software","تشخيص المشكلة","fault isolation"],
+    a:"ابدأ بفصل المشروع إلى أجزاء صغيرة: جرّب البورد وحده ثم الحساس وحده ثم الواجهة وحدها. إذا اشتغل كل جزء منفصل تعرف أين يبدأ الخلل."
+  },
+  {
+    q:"شلون أفحص مشروع الرادار أو المسح بالسيرفو؟",
+    aliases:["radar project","servo radar","مشروع الرادار"],
+    a:"تأكد أولاً أن السيرفو يمسح الزوايا بسلاسة ثم راقب هل الحساس يغيّر القراءة مع تغيّر الاتجاه. إذا يوجد واجهة رادار فافحص تطابق الحركة الفعلية مع الرسم على الشاشة."
+  },
+  {
+    q:"شلون أفحص مشروع ساعة أو جرس مدرسة؟",
+    aliases:["school bell project","clock project","مشروع الجرس"],
+    a:"اضبط الوقت أولاً وتأكد من حفظه ثم أنشئ موعد قريب بعد دقائق قليلة للتجربة. راقب هل الريلي أو البازر يعمل عند الموعد المحدد وهل تتكرر العملية حسب التصميم."
+  },
+  {
+    q:"شلون أفحص مشروع تلوث الهواء؟",
+    aliases:["air pollution project","mq135 project","مشروع الهواء"],
+    a:"افحص قيمة MQ-135 الخام أولاً ثم النسبة أو التصنيف في الواجهة. جرّب تعريض الحساس لهواء مختلف بشكل آمن وتحقق أن اللون أو الحالة تتغير كما هو متوقع."
+  },
+  {
+    q:"شلون أفحص مشروع نبض أو أجهزة طبية تعليمية؟",
+    aliases:["medical project","heart rate project","defibrillator project"],
+    a:"ابدأ بالحساسات منخفضة الخطورة مثل MAX30100 وتأكد من ظهور القراءة بصرياً. أما أي جزء يحاكي فولتاً عالياً أو ريلي مرتبطاً بمحول فيجب اختباره تعليمياً وبعزل كامل واحتياطات أمان."
+  }
+];
+
+const frequent = [
+  "التواصل مع الصفحة",
+  "شلون يشتغل المشروع؟",
+  "شنو اسم شبكة الواي فاي؟",
+  "شنو الباسورد الافتراضي؟",
+  "شنو الـ IP مال الواجهة؟",
+  "شلون أفحص MQ-135؟",
+  "ليش القراءات تطلع NaN؟",
+  "شلون أفحص الريلي؟",
+  "شلون أستخدم RUN.bat؟",
+  "هلو",
+  "اشلونك"
+];
+
+const messages = document.getElementById('messages');
+const input = document.getElementById('promptInput');
+const sendBtn = document.getElementById('sendBtn');
+const suggestionsBox = document.getElementById('suggestions');
+const quickChips = document.getElementById('quickChips');
+
+function normalize(s){
+  return (s || "")
+    .toLowerCase()
+    .replace(/[ًٌٍَُِّْـ]/g,'')
+    .replace(/[أإآ]/g,'ا')
+    .replace(/ة/g,'ه')
+    .replace(/ى/g,'ي')
+    .replace(/[^\w\u0600-\u06FF\s-]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function tokenize(s){
+  return normalize(s).split(' ').filter(Boolean);
+}
+
+function containsAny(text, list){
+  return list.some(item => text.includes(normalize(item)));
+}
+
+function scoreEntry(query, entry){
+  const q = normalize(query);
+  if(!q) return 0;
+  const pool = normalize(entry.q + " " + (entry.aliases||[]).join(" ") + " " + entry.a);
+
+  let score = 0;
+  if (normalize(entry.q).includes(q)) score += 120;
+  if ((entry.aliases||[]).some(a => normalize(a).includes(q))) score += 80;
+  if (pool.includes(q)) score += 35;
+
+  const queryWords = tokenize(q);
+  const poolWords = new Set(tokenize(pool));
+  queryWords.forEach(w => {
+    if (poolWords.has(w)) score += 14;
+    if (w.length > 2 && pool.includes(w)) score += 6;
+  });
+
+  return score;
+}
+
+function getMatches(query, limit=8){
+  const scored = KB
+    .map(entry => ({entry, score: scoreEntry(query, entry)}))
+    .filter(x => x.score > 0)
+    .sort((a,b) => b.score - a.score);
+
+  const unique = [];
+  const used = new Set();
+  for(const item of scored){
+    if(used.has(item.entry.q)) continue;
+    used.add(item.entry.q);
+    unique.push(item.entry);
+    if(unique.length >= limit) break;
+  }
+  return unique;
+}
+
+function getSmallTalk(query){
+  const q = normalize(query);
+  if(!q) return null;
+
+  if (containsAny(q, ["تواصل", "انستغرام", "انستا", "instagram", "صفحه", "صفحة"])) {
+    return {
+      text: "هذا رابط التواصل الرسمي مع الصفحة.",
+      suggestions: ["شلون يشتغل المشروع؟", "شنو الـ IP مال الواجهة؟", "شنو اسم شبكة الواي فاي؟"],
+      action: { label: "فتح صفحة Instagram", url: INSTAGRAM_URL }
+    };
+  }
+
+  if (containsAny(q, ["هلو","هلا","مرحبا","سلام","السلام عليكم","صباح الخير","مساء الخير"])) {
+    return {
+      text: "هلا، اكتب سؤالك عن المشروع أو التشغيل أو الفحص وأنا أجاوبك.",
+      suggestions: ["شلون يشتغل المشروع؟","شنو الـ IP مال الواجهة؟","التواصل مع الصفحة"]
+    };
+  }
+
+  if (containsAny(q, ["اشلونك","شلونك","كيف حالك","خبارك"])) {
+    return {
+      text: "تمام. اكتب سؤالك أو المشكلة مباشرة.",
+      suggestions: ["شلون أفحص المشروع بسرعة؟","شنو اسم شبكة الواي فاي؟","التواصل مع الصفحة"]
+    };
+  }
+
+  if (containsAny(q, ["شكرا","مشكور","تسلم","يعطيك العافيه","يعطيك العافية"])) {
+    return {
+      text: "العفو.",
+      suggestions: ["شلون يشتغل المشروع؟","التواصل مع الصفحة"]
+    };
+  }
+
+  if (containsAny(q, ["منو انت","من انت","شنو انت","منو انته"])) {
+    return {
+      text: "أنا مساعد بسيط داخل الصفحة، أساعدك بأسئلة التشغيل والفحص وبعض الأسئلة العامة المرتبطة بالمشروع.",
+      suggestions: ["شلون يشتغل المشروع؟","شنو الـ IP مال الواجهة؟","التواصل مع الصفحة"]
+    };
+  }
+
+  if (containsAny(q, ["باي","مع السلامه","مع السلامة","اشوفك","نشوفك"])) {
+    return {
+      text: "بالتوفيق.",
+      suggestions: ["التواصل مع الصفحة","شلون أستخدم RUN.bat؟"]
+    };
+  }
+
+  return null;
+}
+
+function getKBAnswer(query){
+  const matches = getMatches(query, 5);
+  if(matches.length){
+    const best = matches[0];
+    if(scoreEntry(query, best) >= 24){
+      const result = {
+        text: best.a,
+        suggestions: matches.slice(1,4).map(x => x.q)
+      };
+
+      if(normalize(best.q) === normalize("التواصل مع الصفحة")){
+        result.action = { label: "فتح صفحة Instagram", url: INSTAGRAM_URL };
+      }
+
+      return result;
+    }
+  }
+
+  return {
+    text: "ما لقيت جواب مباشر بنفس الصياغة، لكن أقدر أفهم سؤالك إذا كتبته بشكل أبسط أو تختار واحد من الاقتراحات الأقرب.",
+    suggestions: ["شلون يشتغل المشروع؟","شنو الـ IP مال الواجهة؟","التواصل مع الصفحة","شلون أفحص المشروع بسرعة؟"]
+  };
+}
+
+function getAnswer(query){
+  return getSmallTalk(query) || getKBAnswer(query);
+}
+
+function saveHistory(){
+  localStorage.setItem('offline_project_chat_history', messages.innerHTML);
+}
+
+function restoreHistory(){
+  const saved = localStorage.getItem('offline_project_chat_history');
+  if(saved){
+    messages.innerHTML = saved;
+    scrollBottom(false);
+  }else{
+    addMessage("ai","اكتب سؤالك.");
+  }
+}
+
+function scrollBottom(smooth=true){
+  messages.scrollTo({top: messages.scrollHeight, behavior: smooth ? 'smooth' : 'auto'});
+}
+
+function rowTemplate(role, html){
+  const row = document.createElement('div');
+  row.className = `row ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'mini-avatar';
+  avatar.textContent = role === 'ai' ? 'AI' : 'أنت';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = html || "";
+
+  if(role === 'ai'){
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+  }else{
+    row.appendChild(bubble);
+    row.appendChild(avatar);
+  }
+  return {row, bubble};
+}
+
+function addMessage(role, text){
+  const {row, bubble} = rowTemplate(role, "");
+  messages.appendChild(row);
+
+  if(role === 'ai'){
+    typeInto(bubble, text, 10);
+  }else{
+    bubble.textContent = text;
+  }
+
+  scrollBottom();
+  setTimeout(saveHistory, 80);
+}
+
+function addActionBubble(label, url){
+  const {row, bubble} = rowTemplate("ai", "");
+  bubble.innerHTML = `<a class="action-link" href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+  messages.appendChild(row);
+  scrollBottom();
+  setTimeout(saveHistory, 80);
+}
+
+function typeInto(el, text, speed=12){
+  let i = 0;
+  const content = text || "";
+  const timer = setInterval(() => {
+    el.textContent = content.slice(0, i + 1);
+    i++;
+    scrollBottom();
+    if(i >= content.length){
+      clearInterval(timer);
+      saveHistory();
+    }
+  }, speed);
+}
+
+function showTyping(){
+  const row = document.createElement('div');
+  row.className = 'row ai';
+  row.id = 'typingRow';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'mini-avatar';
+  avatar.textContent = 'AI';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble typing';
+  bubble.innerHTML = '<span></span><span></span><span></span>';
+
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  messages.appendChild(row);
+  scrollBottom();
+}
+
+function hideTyping(){
+  const old = document.getElementById('typingRow');
+  if(old) old.remove();
+}
+
+function renderQuickChips(list = frequent){
+  quickChips.innerHTML = "";
+  list.forEach(text => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = text;
+    btn.onclick = () => {
+      input.value = text;
+      updateSuggestions();
+      sendMessage();
+    };
+    quickChips.appendChild(btn);
+  });
+}
+
+function renderSuggestions(list){
+  suggestionsBox.innerHTML = "";
+  if(!list.length){
+    suggestionsBox.style.display = "none";
+    return;
+  }
+  list.forEach(text => {
+    const btn = document.createElement('button');
+    btn.className = 'suggestion';
+    btn.textContent = text;
+    btn.onclick = () => {
+      input.value = text;
+      suggestionsBox.style.display = "none";
+      sendMessage();
+    };
+    suggestionsBox.appendChild(btn);
+  });
+  suggestionsBox.style.display = "block";
+}
+
+function updateSuggestions(){
+  const q = input.value.trim();
+  if(!q){
+    renderSuggestions(frequent);
+    return;
+  }
+
+  const matches = getMatches(q, 8).map(x => x.q);
+
+  if (containsAny(q, ["تواصل","انستا","انستغرام","instagram"]) && !matches.includes("التواصل مع الصفحة")) {
+    matches.unshift("التواصل مع الصفحة");
+  }
+
+  if (containsAny(q, ["هلو","هلا","مرحبا","سلام"]) && !matches.includes("هلو")) {
+    matches.unshift("هلو");
+  }
+
+  if (containsAny(q, ["اشلونك","شلونك","كيف حالك"]) && !matches.includes("اشلونك")) {
+    matches.unshift("اشلونك");
+  }
+
+  renderSuggestions(matches.slice(0,8));
+}
+
+function sendMessage(){
+  const q = input.value.trim();
+  if(!q) return;
+
+  suggestionsBox.style.display = "none";
+  addMessage("user", q);
+  input.value = "";
+
+  const answer = getAnswer(q);
+  showTyping();
+
+  setTimeout(() => {
+    hideTyping();
+    addMessage("ai", answer.text);
+
+    if(answer.action){
+      setTimeout(() => {
+        addActionBubble(answer.action.label, answer.action.url);
+      }, 220);
+    }
+
+    if(answer.suggestions && answer.suggestions.length){
+      renderQuickChips(answer.suggestions);
+    }else{
+      renderQuickChips(frequent);
+    }
+  }, 480);
+}
+
+sendBtn.addEventListener('click', sendMessage);
+
+input.addEventListener('input', updateSuggestions);
+input.addEventListener('focus', updateSuggestions);
+
+input.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+document.addEventListener('click', e => {
+  if(!suggestionsBox.contains(e.target) && e.target !== input){
+    suggestionsBox.style.display = "none";
+  }
+});
+
+restoreHistory();
+renderQuickChips();
+</script>
+</body>
+</html>

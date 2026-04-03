@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مولد سيرة ذاتية احترافي - مشاريع العراق</title>
+  <style>
+    :root{
+      --bg1:#edf4ff;
+      --bg2:#fdfefe;
+      --panel:#ffffffd9;
+      --card:#ffffff;
+      --stroke:#d9e5f3;
+      --text:#13233d;
+      --muted:#6d7f98;
+      --accent:#5c82c4;
+      --accent2:#9cb6e7;
+      --shadow:0 22px 60px rgba(78,105,150,.12);
+      --soft-shadow:0 18px 40px rgba(86,114,158,.10);
+      --radius:26px;
+      --success:#61a57e;
+      --warning:#d0a34d;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(171,201,255,.35), transparent 22%),
+        radial-gradient(circle at 100% 100%, rgba(200,226,255,.18), transparent 24%),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
+    }
+
+    .shell{
+      width:min(1680px, calc(100% - 28px));
+      margin:14px auto;
+      display:grid;
+      grid-template-columns:minmax(780px,1.72fr) minmax(380px,.8fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--stroke);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .preview-wrap{
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+      min-height:1000px;
+    }
+    .preview-wrap::before,
+    .preview-wrap::after{
+      content:"";
+      position:absolute;
+      border-radius:50%;
+      pointer-events:none;
+      filter:blur(8px);
+      opacity:.8;
+    }
+    .preview-wrap::before{
+      width:240px;height:240px;
+      left:-90px;top:-90px;
+      background:radial-gradient(circle, rgba(165,194,246,.48), transparent 68%);
+    }
+    .preview-wrap::after{
+      width:280px;height:280px;
+      right:-100px;bottom:-120px;
+      background:radial-gradient(circle, rgba(159,204,242,.34), transparent 70%);
+    }
+
+    .paper-stage{
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      position:relative;
+      z-index:2;
+    }
+
+    .resume-page{
+      width:min(794px, 100%);
+      aspect-ratio:210 / 297;
+      min-height:1123px;
+      background:#fff;
+      border:1px solid rgba(82,112,162,.16);
+      border-radius:22px;
+      box-shadow:0 24px 50px rgba(65,96,141,.18);
+      overflow:hidden;
+      position:relative;
+      transform-origin:top center;
+    }
+
+    .control{
+      padding:18px 16px 14px;
+      position:sticky;
+      top:14px;
+    }
+    .brand{
+      margin-bottom:12px;
+      text-align:center;
+    }
+    .brand h1{
+      margin:0;
+      font-size:19px;
+      line-height:1.55;
+      font-weight:900;
+      color:#162742;
+    }
+    .brand .sub{
+      margin-top:7px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.7;
+    }
+    .brand strong{
+      color:var(--accent);
+      direction:ltr;
+      display:inline-block;
+      letter-spacing:.5px;
+    }
+
+    .template-box,
+    .design-box{
+      background:linear-gradient(180deg, rgba(255,255,255,.88), rgba(245,249,255,.95));
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:12px;
+      margin-bottom:12px;
+    }
+
+    .mini-title{
+      font-size:12px;
+      font-weight:900;
+      margin-bottom:9px;
+      color:#1e304c;
+    }
+
+    .template-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .template-card{
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      padding:8px;
+      background:#fff;
+      cursor:pointer;
+      transition:.22s ease;
+      text-align:right;
+      color:#2f4565;
+    }
+    .template-card:hover{transform:translateY(-2px); box-shadow:0 12px 24px rgba(86,111,149,.12)}
+    .template-card.active{border-color:var(--accent); box-shadow:0 0 0 3px rgba(92,130,196,.12)}
+    .template-thumb{
+      height:78px;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,.05);
+      margin-bottom:7px;
+      background:#f6f9ff;
+      position:relative;
+    }
+    .template-card small{
+      display:block;
+      color:var(--muted);
+      font-size:10px;
+      margin-top:3px;
+      line-height:1.5;
+    }
+
+    .thumb-1{
+      background:
+        linear-gradient(90deg,#ffffff 0 66%, #6e8dc9 66% 100%);
+    }
+    .thumb-1::before{
+      content:"";
+      position:absolute;
+      right:12px; top:10px;
+      width:18px; height:18px; border-radius:50%;
+      border:2px solid rgba(255,255,255,.5);
+      background:rgba(255,255,255,.18);
+    }
+    .thumb-1::after{
+      content:"";
+      position:absolute; left:10px; top:12px; width:54%; height:5px;
+      background:#d8dfeb; border-radius:8px;
+      box-shadow:0 11px 0 #d8dfeb, 0 22px 0 #d8dfeb, 0 38px 0 #e3e8f3, 0 49px 0 #e3e8f3;
+    }
+
+    .thumb-2{
+      background:linear-gradient(180deg,#7291ca 0 27%, #ffffff 27% 100%);
+    }
+    .thumb-2::before{
+      content:"";
+      position:absolute; left:50%; transform:translateX(-50%);
+      top:10px; width:18px; height:18px; border-radius:50%;
+      background:rgba(255,255,255,.28); border:2px solid rgba(255,255,255,.5);
+    }
+    .thumb-2::after{
+      content:"";
+      position:absolute; inset:30px 10px 10px 10px;
+      background:
+        linear-gradient(90deg,#dce4f4 0 46%, transparent 46% 50%, #dce4f4 50% 100%);
+      border-radius:8px;
+    }
+
+    .thumb-3{
+      background:
+        linear-gradient(180deg,#eef4ff 0 100%);
+    }
+    .thumb-3::before{
+      content:"";
+      position:absolute; left:0; top:0; bottom:0; width:24px;
+      background:#87a2d6;
+    }
+    .thumb-3::after{
+      content:"";
+      position:absolute; left:34px; right:10px; top:10px; bottom:10px;
+      background:
+        linear-gradient(180deg,#dce5f5 0 6px, transparent 6px 16px, #dce5f5 16px 22px, transparent 22px 34px, #dce5f5 34px 40px, transparent 40px 48px, #dce5f5 48px 54px, transparent 54px 64px);
+      border-radius:8px;
+    }
+
+    .thumb-4{
+      background:
+        linear-gradient(135deg,#f8fbff 0 65%, #e7eefc 65% 100%);
+    }
+    .thumb-4::before{
+      content:"";
+      position:absolute; top:0; left:0; right:0; height:18px;
+      background:#6d8bc3;
+    }
+    .thumb-4::after{
+      content:"";
+      position:absolute; left:10px; right:10px; top:28px; bottom:10px;
+      background:
+        linear-gradient(90deg,#dce5f6 0 48%, transparent 48% 52%, #dce5f6 52% 100%);
+      border-radius:8px;
+      box-shadow:0 0 0 1px rgba(90,116,160,.08) inset;
+    }
+
+    .group{margin-bottom:11px}
+    .group label,
+    .section-header{
+      display:block;
+      font-size:12px;
+      font-weight:900;
+      color:#1d314f;
+      margin:0 0 7px;
+    }
+
+    input[type="text"], input[type="email"], input[type="tel"], textarea, select{
+      width:100%;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.94);
+      color:#14233b;
+      border-radius:12px;
+      padding:10px 12px;
+      outline:none;
+      font-size:12px;
+      transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+      font-family:inherit;
+    }
+    input::placeholder, textarea::placeholder{color:#92a1b7}
+    input:focus, textarea:focus, select:focus{
+      border-color:rgba(92,130,196,.6);
+      box-shadow:0 0 0 4px rgba(92,130,196,.12);
+    }
+    textarea{resize:vertical; min-height:74px}
+
+    .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+
+    .card-stack{
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      padding:10px;
+      background:rgba(255,255,255,.82);
+      margin-bottom:10px;
+    }
+
+    .row-tools,
+    .inline-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .inline-actions{margin-top:2px}
+
+    .btn{
+      border:1px solid var(--stroke);
+      background:linear-gradient(180deg,#ffffff,#edf4ff);
+      color:#173050;
+      border-radius:12px;
+      padding:10px 14px;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+      transition:.22s ease;
+      box-shadow:0 8px 18px rgba(92,117,156,.08);
+      font-family:inherit;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      border-color:transparent;
+    }
+    .btn.ghost{background:#fff}
+    .btn.danger{color:#7a2940}
+
+    .uploader{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      border:1px dashed rgba(92,130,196,.28);
+      border-radius:16px; background:rgba(255,255,255,.74); padding:12px;
+    }
+    .uploader-preview{
+      width:62px;height:62px;border-radius:50%;overflow:hidden;
+      border:2px solid var(--stroke);background:#f4f7fb;display:grid;place-items:center;
+      color:#5b6b84;font-weight:900;
+    }
+    .uploader-preview img{width:100%; height:100%; object-fit:cover}
+    .uploader-meta{font-size:11px; color:var(--muted); line-height:1.6}
+
+    .foot-note{
+      text-align:center;
+      font-size:11px;
+      color:#687a94;
+      margin-top:10px;
+      line-height:1.7;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      background:#ffffff;
+      border:1px solid var(--stroke);
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:11px;
+      color:#38506f;
+      box-shadow:var(--soft-shadow);
+      margin-bottom:12px;
+    }
+    .status-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--success);
+      box-shadow:0 0 0 6px rgba(97,165,126,.12);
+    }
+
+    /* ===== A4 Generic ===== */
+    .r{
+      position:relative;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+    }
+    .r *{box-sizing:border-box}
+    .r h1,.r h2,.r h3,.r p,.r ul{margin:0}
+    .r ul{padding:0; list-style:none}
+    .muted{color:#6b7d94}
+    .thin-line{height:1px;background:#dbe4f0;margin:18px 0}
+
+    /* ===== Template 1 ===== */
+    .t1{
+      display:grid;
+      grid-template-columns:1.95fr .95fr;
+      direction:ltr;
+      background:#fff;
+    }
+    .t1 .main{
+      padding:28px 24px 26px;
+      color:#101727;
+    }
+    .t1 .side{
+      position:relative;
+      padding:20px 18px 24px;
+      color:#fff;
+      background:linear-gradient(180deg, var(--t1-side,#5f7db6), color-mix(in srgb, var(--t1-side,#5f7db6) 82%, #20304d 18%));
+      border-left:1px solid rgba(255,255,255,.12);
+    }
+    .t1 .side::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,.09), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(255,255,255,.08), transparent 38%);
+      pointer-events:none;
+    }
+    .t1 .avatar{
+      width:98px;height:98px;border-radius:50%;overflow:hidden;
+      border:3px solid rgba(255,255,255,.18);
+      outline:3px solid rgba(255,255,255,.10);
+      margin:4px auto 16px;
+      display:grid; place-items:center;
+      font-weight:900; font-size:30px; letter-spacing:2px;
+      background:rgba(8,18,38,.12);
+      position:relative; z-index:1;
+    }
+    .t1 .avatar img{width:100%;height:100%;object-fit:cover}
+    .t1 .side-name{font-size:20px;font-weight:900;text-align:center;line-height:1.2}
+    .t1 .side-role{font-size:12px;opacity:.95;text-align:center;margin-top:3px}
+    .t1 .side-sec{position:relative;z-index:1;margin-top:18px}
+    .t1 .side-head{
+      font-size:11px;font-weight:900;letter-spacing:1px;margin-bottom:7px;opacity:.95
+    }
+    .t1 .side-list li{
+      font-size:11px;line-height:1.65;margin-bottom:3px;
+      display:flex; align-items:flex-start; gap:8px; justify-content:space-between;
+    }
+    .t1 .side-list li::after{
+      content:"•"; flex:0 0 auto; opacity:.9
+    }
+    .t1 .sec{margin-bottom:18px}
+    .t1 .sec-title{
+      font-size:13px;font-weight:900;letter-spacing:1.2px;text-align:right;margin-bottom:10px
+    }
+    .t1 .profile{
+      font-size:11px;line-height:1.9;color:#2f3950;text-align:right
+    }
+    .t1 .entry{margin-bottom:16px}
+    .t1 .date-pill{
+      display:inline-block; background:#eef3fb; color:#415678; font-size:9px; font-weight:900;
+      padding:4px 9px; border-radius:999px; margin-bottom:8px
+    }
+    .t1 .entry-title{font-size:11px;font-weight:900;text-align:center;line-height:1.5;margin-bottom:6px}
+    .t1 .entry-bullets{padding-left:16px;list-style:disc;text-align:left;direction:ltr}
+    .t1 .entry-bullets li{font-size:10px;line-height:1.7;color:#273348;margin-bottom:2px}
+    .t1 .edu-item{margin-bottom:11px;text-align:right}
+    .t1 .edu-degree{font-size:11px;font-weight:900}
+    .t1 .edu-meta{font-size:9.8px;color:#63738d;line-height:1.6}
+
+    /* ===== Template 2 ===== */
+    .t2{
+      background:#fff;
+      color:#14233e;
+      display:grid;
+      grid-template-rows:auto 1fr;
+    }
+    .t2 .hero{
+      background:linear-gradient(135deg, var(--t2-main,#6e8dc9), color-mix(in srgb, var(--t2-main,#6e8dc9) 75%, #ffffff 25%));
+      color:#fff;
+      padding:26px 28px 22px;
+      position:relative;
+      overflow:hidden;
+    }
+    .t2 .hero::before{
+      content:"";
+      position:absolute; width:220px; height:220px; border-radius:50%;
+      left:-80px; top:-90px; background:rgba(255,255,255,.10);
+    }
+    .t2 .hero::after{
+      content:"";
+      position:absolute; width:200px; height:200px; border-radius:50%;
+      right:-70px; bottom:-80px; background:rgba(255,255,255,.08);
+    }
+    .t2 .hero-grid{
+      display:grid; grid-template-columns:110px 1fr auto; align-items:center; gap:18px; position:relative; z-index:1;
+      direction:ltr;
+    }
+    .t2 .avatar{
+      width:96px;height:96px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.28);
+      background:rgba(255,255,255,.14);display:grid;place-items:center;font-weight:900;font-size:30px
+    }
+    .t2 .avatar img{width:100%;height:100%;object-fit:cover}
+    .t2 .name-wrap{text-align:right;direction:rtl}
+    .t2 .name{font-size:26px;font-weight:900;line-height:1.15}
+    .t2 .role{font-size:13px;opacity:.96;margin-top:5px}
+    .t2 .contact{
+      display:grid; gap:7px; text-align:right; direction:rtl;
+      background:rgba(255,255,255,.12); padding:12px 14px; border-radius:18px; min-width:220px;
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .t2 .contact div{font-size:11px;line-height:1.5}
+    .t2 .body{
+      padding:22px 24px 24px;
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:18px;
+      direction:ltr;
+    }
+    .t2 .card{
+      background:#fff;
+      border:1px solid #dce6f4;
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 10px 25px rgba(87,112,151,.06);
+      margin-bottom:14px;
+    }
+    .t2 .head{
+      font-size:12px; font-weight:900; letter-spacing:1px; color:#3f5d92; margin-bottom:10px;
+      text-transform:uppercase;
+    }
+    .t2 .profile{font-size:11px; line-height:1.9; color:#29384f; text-align:right}
+    .t2 .entry{padding:12px 0; border-bottom:1px dashed #dbe4f0}
+    .t2 .entry:last-child{border-bottom:none; padding-bottom:0}
+    .t2 .entry-title{font-size:11px;font-weight:900;color:#17253f;line-height:1.6}
+    .t2 .date{font-size:9.6px;color:#6b7c94;margin-top:2px;margin-bottom:5px}
+    .t2 .bullets{padding-left:16px; list-style:disc; direction:ltr; text-align:left}
+    .t2 .bullets li{font-size:10px; line-height:1.65; color:#2d3c53; margin-bottom:2px}
+    .t2 .tag-list{display:flex;flex-wrap:wrap;gap:7px}
+    .t2 .tag{
+      border:1px solid #d8e2f1; background:#f6f9ff; border-radius:999px; padding:6px 10px;
+      font-size:10.5px; color:#314761; font-weight:700;
+    }
+    .t2 .edu{padding:10px 0; border-bottom:1px dashed #dbe4f0}
+    .t2 .edu:last-child{border-bottom:none}
+    .t2 .edu strong{display:block; font-size:11px; color:#17253f}
+    .t2 .edu span{font-size:9.8px; color:#6b7d94; line-height:1.6}
+    .t2 .side-col{display:flex; flex-direction:column}
+
+    /* ===== Template 3 ===== */
+    .t3{
+      display:grid;
+      grid-template-columns:96px 1fr;
+      background:#fff;
+      direction:ltr;
+      color:#14233d;
+    }
+    .t3 .rail{
+      background:linear-gradient(180deg, var(--t3-rail,#87a2d6), color-mix(in srgb, var(--t3-rail,#87a2d6) 82%, #e6eefb 18%));
+      position:relative;
+      color:#fff;
+      padding:24px 10px;
+    }
+    .t3 .rail::before{
+      content:"";
+      position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.14), transparent 24%, rgba(255,255,255,.08) 100%);
+      pointer-events:none;
+    }
+    .t3 .rail-wrap{
+      position:relative; z-index:1;
+      display:flex; flex-direction:column; align-items:center; height:100%;
+      gap:16px;
+    }
+    .t3 .avatar{
+      width:66px;height:66px;border-radius:50%;overflow:hidden;
+      border:3px solid rgba(255,255,255,.28); background:rgba(255,255,255,.14);
+      display:grid; place-items:center; font-size:21px; font-weight:900;
+    }
+    .t3 .avatar img{width:100%;height:100%;object-fit:cover}
+    .t3 .rail-label{
+      writing-mode:vertical-rl;
+      transform:rotate(180deg);
+      letter-spacing:1px;
+      font-size:12px;
+      font-weight:900;
+      opacity:.95;
+    }
+    .t3 .content{
+      padding:26px 28px 24px;
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+    }
+    .t3 .top{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:16px;
+      align-items:start;
+      direction:ltr;
+    }
+    .t3 .title-wrap{text-align:right; direction:rtl}
+    .t3 .name{font-size:28px;font-weight:900;line-height:1.1;color:#16253f}
+    .t3 .role{font-size:13px;color:#5672a8;margin-top:5px;font-weight:700}
+    .t3 .summary{
+      background:#f7faff;
+      border:1px solid #dbe5f4;
+      border-radius:18px;
+      padding:14px 16px;
+      font-size:11px;
+      line-height:1.95;
+      color:#2c3a51;
+      margin-top:16px;
+      text-align:right;
+    }
+    .t3 .meta-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-top:18px;
+    }
+    .t3 .meta-card{
+      border:1px solid #dce5f2;
+      background:#fff;
+      border-radius:16px;
+      padding:12px;
+      box-shadow:0 8px 20px rgba(88,113,151,.06);
+      min-height:94px;
+    }
+    .t3 .meta-head{
+      font-size:10px;
+      color:#5874a8;
+      font-weight:900;
+      margin-bottom:7px;
+      letter-spacing:1px;
+    }
+    .t3 .meta-card li,
+    .t3 .meta-card div{
+      font-size:10.5px;
+      line-height:1.7;
+      color:#273751;
+    }
+    .t3 .bottom{
+      display:grid;
+      grid-template-columns:1.25fr .9fr;
+      gap:18px;
+      margin-top:18px;
+      direction:ltr;
+    }
+    .t3 .section{
+      border:1px solid #dce5f2;
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+      box-shadow:0 8px 22px rgba(88,113,151,.05);
+    }
+    .t3 .section-title{
+      font-size:12px; font-weight:900; color:#5672a8; letter-spacing:1px; margin-bottom:12px;
+      text-transform:uppercase;
+    }
+    .t3 .timeline{
+      position:relative;
+      padding-right:2px;
+    }
+    .t3 .timeline::before{
+      content:"";
+      position:absolute;
+      left:8px; top:6px; bottom:4px;
+      width:2px; background:#d7e2f1;
+    }
+    .t3 .timeline-item{
+      position:relative;
+      padding-left:28px;
+      margin-bottom:14px;
+    }
+    .t3 .timeline-item::before{
+      content:"";
+      position:absolute;
+      left:2px; top:6px; width:14px; height:14px; border-radius:50%;
+      background:#7a96ce; border:3px solid #edf4ff;
+      box-shadow:0 0 0 1px #d7e2f1;
+    }
+    .t3 .timeline-title{font-size:11px; font-weight:900; color:#16253f; line-height:1.6}
+    .t3 .timeline-date{font-size:9.5px; color:#6d7f97; margin:3px 0 4px}
+    .t3 .timeline li{font-size:10px; color:#2e3d55; line-height:1.65; list-style:disc; margin-left:14px}
+    .t3 .edu-item{
+      padding:10px 0;
+      border-bottom:1px dashed #dbe5f2;
+    }
+    .t3 .edu-item:last-child{border-bottom:none}
+    .t3 .edu-item strong{display:block; font-size:11px; color:#16253f}
+    .t3 .edu-item span{font-size:9.8px; color:#6c7d96; line-height:1.6}
+    .t3 .stack{display:flex; flex-direction:column; gap:18px}
+
+    /* ===== Template 4 ===== */
+    .t4{
+      background:
+        linear-gradient(180deg, var(--t4-band,#6d8bc3) 0 128px, #f8fbff 128px 100%);
+      color:#12223c;
+      padding:26px;
+      direction:ltr;
+    }
+    .t4 .top-card{
+      background:rgba(255,255,255,.96);
+      border:1px solid #dce5f4;
+      border-radius:22px;
+      box-shadow:0 16px 38px rgba(87,112,151,.08);
+      padding:18px 18px 16px;
+      display:grid;
+      grid-template-columns:100px 1fr auto;
+      gap:16px;
+      align-items:center;
+    }
+    .t4 .avatar{
+      width:86px;height:86px;border-radius:20px;overflow:hidden;
+      background:linear-gradient(135deg,#eef4ff,#dbe7fb);
+      border:1px solid #dbe5f4;
+      display:grid; place-items:center; font-weight:900; font-size:28px; color:#47628f;
+    }
+    .t4 .avatar img{width:100%;height:100%;object-fit:cover}
+    .t4 .name-wrap{text-align:right; direction:rtl}
+    .t4 .name{font-size:27px;font-weight:900;line-height:1.1;color:#15253f}
+    .t4 .role{font-size:13px;color:#5c78ad;margin-top:6px;font-weight:700}
+    .t4 .contact-wrap{
+      display:grid; gap:6px; text-align:right; direction:rtl;
+      background:#f7faff; border:1px solid #dce5f4; border-radius:18px; padding:12px 14px; min-width:220px;
+    }
+    .t4 .contact-wrap div{font-size:11px;color:#2b3c53;line-height:1.55}
+    .t4 .body{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:1.15fr .9fr;
+      gap:18px;
+      align-items:start;
+      direction:ltr;
+    }
+    .t4 .box{
+      background:#fff;
+      border:1px solid #dce5f4;
+      border-radius:20px;
+      padding:16px;
+      box-shadow:0 10px 28px rgba(87,112,151,.05);
+      margin-bottom:16px;
+    }
+    .t4 .box-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:11px;
+    }
+    .t4 .box-title{
+      font-size:12px;font-weight:900;color:#4f6ea5;letter-spacing:1px;text-transform:uppercase
+    }
+    .t4 .chip{
+      font-size:9px;
+      border-radius:999px;
+      background:#eef4ff;
+      color:#5270a7;
+      padding:5px 8px;
+      font-weight:900;
+      border:1px solid #dbe5f4;
+    }
+    .t4 .profile{
+      font-size:11px;line-height:1.9;color:#293851;text-align:right
+    }
+    .t4 .exp{
+      padding:11px 0;
+      border-bottom:1px dashed #dbe5f2;
+    }
+    .t4 .exp:last-child{border-bottom:none}
+    .t4 .exp-title{font-size:11px;font-weight:900;color:#16253f;line-height:1.55}
+    .t4 .exp-date{font-size:9.6px;color:#6d7e95;margin:3px 0 5px}
+    .t4 .exp li{font-size:10px;color:#2c3c53;line-height:1.65;list-style:disc;margin-left:15px}
+    .t4 .skill-grid{
+      display:grid; grid-template-columns:repeat(2,1fr); gap:8px;
+    }
+    .t4 .skill-pill{
+      border:1px solid #dce5f4; background:#f8fbff; border-radius:12px; padding:8px 10px;
+      font-size:10.4px; color:#2f4564; font-weight:700;
+    }
+    .t4 .edu-item{
+      padding:10px 0;
+      border-bottom:1px dashed #dbe5f2;
+    }
+    .t4 .edu-item:last-child{border-bottom:none}
+    .t4 .edu-item strong{display:block; font-size:11px; color:#16253f}
+    .t4 .edu-item span{font-size:9.8px; color:#6b7d95; line-height:1.6}
+    .t4 .lang-list li,
+    .t4 .hobby-list li{
+      font-size:10.5px; color:#2c3c53; line-height:1.75; padding:6px 0;
+      border-bottom:1px dashed #e2eaf5;
+    }
+    .t4 .lang-list li:last-child,
+    .t4 .hobby-list li:last-child{border-bottom:none}
+
+    @media (max-width: 1220px){
+      .shell{grid-template-columns:1fr}
+      .control{position:relative; top:0}
+    }
+
+    @media (max-width: 860px){
+      .shell{width:min(100% - 14px, 100%)}
+      .preview-wrap{min-height:auto}
+      .resume-page{
+        min-height:auto;
+        width:100%;
+        aspect-ratio:auto;
+        height:auto;
+      }
+      .paper-stage{overflow:auto}
+      .template-grid{grid-template-columns:1fr}
+      .grid-2,.grid-3{grid-template-columns:1fr}
+    }
+
+    @page{
+      size:A4 portrait;
+      margin:0;
+    }
+
+    @media print{
+      body{background:#fff}
+      .control, .status-pill{display:none !important}
+      .shell{display:block; width:100%; margin:0}
+      .preview-wrap{padding:0; border:none; box-shadow:none; background:#fff}
+      .panel{background:#fff; border:none; box-shadow:none; backdrop-filter:none}
+      .paper-stage{display:block}
+      .resume-page{
+        width:210mm;
+        height:297mm;
+        min-height:auto;
+        border:none;
+        border-radius:0;
+        box-shadow:none;
+        margin:0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel preview-wrap">
+      <div class="status-pill"><span class="status-dot"></span>معاينة A4 طولية + تنزيل مباشر PDF</div>
+      <div class="paper-stage">
+        <div class="resume-page" id="resumePage"></div>
+      </div>
+    </section>
+
+    <aside class="panel control">
+      <div class="brand">
+        <h1>مولد سيرة ذاتية خاص<br>بمشاريع العراق</h1>
+        <div class="sub"><strong>iraq_project</strong></div>
+      </div>
+
+      <div class="template-box">
+        <div class="mini-title">اختيار القالب</div>
+        <div class="template-grid" id="templateChooser"></div>
+      </div>
+
+      <div class="group">
+        <label for="nameInput">الاسم</label>
+        <input id="nameInput" type="text" placeholder="مثال: محمد محمد عبدالكريم">
+      </div>
+
+      <div class="group">
+        <label for="titleInput">الوظيفة</label>
+        <input id="titleInput" type="text" placeholder="مثال: Software Engineer">
+      </div>
+
+      <div class="grid-2">
+        <div class="group">
+          <label for="emailInput">البريد</label>
+          <input id="emailInput" type="email" placeholder="you@example.com">
+        </div>
+        <div class="group">
+          <label for="phoneInput">الهاتف</label>
+          <input id="phoneInput" type="tel" placeholder="+964 7xx xxx xxxx">
+        </div>
+      </div>
+
+      <div class="group">
+        <label for="addressInput">العنوان</label>
+        <input id="addressInput" type="text" placeholder="Baghdad, Iraq">
+      </div>
+
+      <div class="group">
+        <label for="profileInput">نبذة تعريفية (Profile)</label>
+        <textarea id="profileInput" placeholder="اكتب نبذة قصيرة مرتبة عن خبرتك وإنجازاتك"></textarea>
+      </div>
+
+      <div class="group">
+        <div class="section-header">الخبرة العملية</div>
+        <div id="experienceForm"></div>
+        <div class="row-tools">
+          <button class="btn" type="button" id="addExperienceBtn">إضافة خبرة</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="section-header">التعليم</div>
+        <div id="educationForm"></div>
+        <div class="row-tools">
+          <button class="btn" type="button" id="addEducationBtn">إضافة تعليم</button>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="group">
+          <label for="skillsInput">المهارات</label>
+          <textarea id="skillsInput" placeholder="SQL Database Management&#10;Python&#10;UI/UX"></textarea>
+        </div>
+        <div class="group">
+          <label for="languagesInput">اللغات</label>
+          <textarea id="languagesInput" placeholder="Arabic: Native&#10;English: Professional"></textarea>
+        </div>
+        <div class="group">
+          <label for="hobbiesInput">الهوايات</label>
+          <textarea id="hobbiesInput" placeholder="Writing&#10;Football&#10;Travel"></textarea>
+        </div>
+      </div>
+
+      <div class="group">
+        <label>صورة شخصية (اختياري)</label>
+        <div class="uploader">
+          <div class="uploader-preview" id="miniPhotoPreview">AA</div>
+          <div class="uploader-meta">ارفع صورة مرة واحدة، وستظهر مباشرة داخل كل القوالب مع حفظ تلقائي محلي.</div>
+          <input id="photoInput" type="file" accept="image/*">
+        </div>
+      </div>
+
+      <div class="inline-actions">
+        <button class="btn primary" id="downloadPdfBtn" type="button">تحميل PDF مباشر</button>
+        <button class="btn ghost" id="printBtn" type="button">طباعة</button>
+        <button class="btn ghost" id="resetBtn" type="button">إعادة تعيين</button>
+      </div>
+
+      <div class="foot-note">القوالب أربعة مختلفة بالشكل، وليست مجرد ألوان. آخر تعديل يُحفظ تلقائيًا داخل المتصفح.</div>
+    </aside>
+  </div>
+
+  <template id="experienceTemplate">
+    <div class="card-stack exp-card">
+      <div class="grid-2">
+        <div class="group">
+          <label>الفترة</label>
+          <input type="text" data-key="date" placeholder="Jan 2022 - Dec 2023">
+        </div>
+        <div class="group">
+          <label>المسمى / الشركة</label>
+          <input type="text" data-key="title" placeholder="Senior Software Developer — Company">
+        </div>
+      </div>
+      <div class="group">
+        <label>النقاط (كل سطر نقطة)</label>
+        <textarea data-key="bullets" placeholder="Developed and maintained software using Java, Python and C#&#10;Led cross-functional teams"></textarea>
+      </div>
+      <button class="btn danger remove-card" type="button">حذف</button>
+    </div>
+  </template>
+
+  <template id="educationTemplate">
+    <div class="card-stack edu-card">
+      <div class="grid-2">
+        <div class="group">
+          <label>الدرجة / التخصص</label>
+          <input type="text" data-key="degree" placeholder="Masters in Software Engineering">
+        </div>
+        <div class="group">
+          <label>الجامعة / الفترة</label>
+          <input type="text" data-key="meta" placeholder="XYZ University — Jan 2019 - Dec 2020">
+        </div>
+      </div>
+      <button class="btn danger remove-card" type="button">حذف</button>
+    </div>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script>
+    const STORAGE_KEY = 'iraq_resume_builder_a4_templates_v2';
+
+    const templates = {
+      classicSplit: {
+        label: 'Classic Split',
+        desc: 'قريب جدًا من الصورة الأصلية',
+        thumb: 'thumb-1',
+        colors: { side: '#5f7db6' }
+      },
+      executiveTop: {
+        label: 'Executive Top',
+        desc: 'هيدر علوي رسمي وحديث',
+        thumb: 'thumb-2',
+        colors: { main: '#6e8dc9' }
+      },
+      timelineRail: {
+        label: 'Timeline Rail',
+        desc: 'شريط جانبي مع تايم لاين',
+        thumb: 'thumb-3',
+        colors: { rail: '#87a2d6' }
+      },
+      premiumCards: {
+        label: 'Premium Cards',
+        desc: 'بطاقات عصرية واضحة',
+        thumb: 'thumb-4',
+        colors: { band: '#6d8bc3' }
+      }
+    };
+
+    const defaults = {
+      template: 'classicSplit',
+      name: 'Your Name',
+      title: 'Software Engineer',
+      email: 'example@gmail.com',
+      phone: '+964 7xx xxx xxxx',
+      address: 'Baghdad, Iraq',
+      profile: 'I am a software engineer with experience in a variety of programming languages and a track record of delivering high-quality solutions for web, mobile and internal systems.',
+      skills: 'SQL Database Management\nLinux/Unix Command Line\nPython\nC#\nUI/UX',
+      languages: 'English: Proficient\nArabic: Native',
+      hobbies: 'Writing\nCricket\nMusic',
+      photo: '',
+      experience: [
+        {
+          date: 'Jan 2022 - Dec 2023',
+          title: 'Senior Software Developer — Company',
+          bullets: 'Developed and maintained software using Java, Python and C#.\nLed cross-functional teams to deliver projects.'
+        },
+        {
+          date: 'Jan 2021 - Dec 2021',
+          title: 'Web Developer — Company',
+          bullets: 'Built web apps with HTML, CSS, JavaScript and PHP.\nWorked with cross-functional teams to design UI.'
+        }
+      ],
+      education: [
+        {degree:'Masters in Software Engineering', meta:'XYZ University — Jan 2019 - Dec 2020'},
+        {degree:'Bachelor in Computer Science', meta:'XYZ University — Jan 2015 - Dec 2019'}
+      ]
+    };
+
+    let state = loadState();
+
+    const resumePage = document.getElementById('resumePage');
+    const templateChooser = document.getElementById('templateChooser');
+    const experienceForm = document.getElementById('experienceForm');
+    const educationForm = document.getElementById('educationForm');
+    const miniPhotoPreview = document.getElementById('miniPhotoPreview');
+
+    const inputs = {
+      name: document.getElementById('nameInput'),
+      title: document.getElementById('titleInput'),
+      email: document.getElementById('emailInput'),
+      phone: document.getElementById('phoneInput'),
+      address: document.getElementById('addressInput'),
+      profile: document.getElementById('profileInput'),
+      skills: document.getElementById('skillsInput'),
+      languages: document.getElementById('languagesInput'),
+      hobbies: document.getElementById('hobbiesInput'),
+      photo: document.getElementById('photoInput')
+    };
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return structuredClone(defaults);
+        const saved = JSON.parse(raw);
+        return mergeWithDefaults(saved);
+      }catch(e){
+        return structuredClone(defaults);
+      }
+    }
+
+    function mergeWithDefaults(saved){
+      const merged = structuredClone(defaults);
+      Object.assign(merged, saved || {});
+      merged.experience = Array.isArray(saved?.experience) && saved.experience.length ? saved.experience : structuredClone(defaults.experience);
+      merged.education = Array.isArray(saved?.education) && saved.education.length ? saved.education : structuredClone(defaults.education);
+      if(!templates[merged.template]) merged.template = 'classicSplit';
+      return merged;
+    }
+
+    function persist(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function escapeHtml(text){
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+    }
+
+    function initials(name){
+      const cleaned = String(name || '').trim();
+      if(!cleaned) return 'AA';
+      const parts = cleaned.split(/\s+/).slice(0,2);
+      return parts.map(p => p[0]?.toUpperCase() || '').join('') || 'AA';
+    }
+
+    function linesToArray(text){
+      return String(text || '')
+        .split(/\n+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
+    function makeAvatar(cls='avatar'){
+      const code = initials(state.name);
+      return state.photo
+        ? `<div class="${cls}"><img src="${state.photo}" alt="photo"></div>`
+        : `<div class="${cls}">${escapeHtml(code)}</div>`;
+    }
+
+    function renderMiniPhoto(){
+      const code = initials(state.name);
+      miniPhotoPreview.innerHTML = state.photo ? `<img src="${state.photo}" alt="photo">` : escapeHtml(code);
+    }
+
+    function renderTemplateChooser(){
+      templateChooser.innerHTML = '';
+      Object.entries(templates).forEach(([key, t]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'template-card' + (state.template === key ? ' active' : '');
+        btn.dataset.template = key;
+        btn.innerHTML = `
+          <div class="template-thumb ${t.thumb}"></div>
+          <div><strong>${t.label}</strong></div>
+          <small>${t.desc}</small>
+        `;
+        btn.addEventListener('click', () => {
+          state.template = key;
+          persist();
+          renderTemplateChooser();
+          renderResume();
+        });
+        templateChooser.appendChild(btn);
+      });
+    }
+
+    function renderExpClassic(){
+      return state.experience.map(item => {
+        const bullets = linesToArray(item.bullets).map(b => `<li>${escapeHtml(b)}</li>`).join('');
+        return `
+          <div class="entry">
+            <div class="date-pill">${escapeHtml(item.date || '')}</div>
+            <div class="entry-title">${escapeHtml(item.title || '')}</div>
+            <ul class="entry-bullets">${bullets || '<li>-</li>'}</ul>
+          </div>`;
+      }).join('');
+    }
+
+    function renderEduClassic(){
+      return state.education.map(item => `
+        <div class="edu-item">
+          <div class="edu-degree">${escapeHtml(item.degree || '')}</div>
+          <div class="edu-meta">${escapeHtml(item.meta || '')}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderTagList(items){
+      return items.map(item => `<span class="tag">${escapeHtml(item)}</span>`).join('');
+    }
+
+    function renderSkillGrid(items){
+      return items.map(item => `<div class="skill-pill">${escapeHtml(item)}</div>`).join('');
+    }
+
+    function renderSimpleList(items){
+      return items.map(item => `<li>${escapeHtml(item)}</li>`).join('') || '<li>-</li>';
+    }
+
+    function templateClassicSplit(){
+      const contact = [state.phone, state.email, state.address].filter(Boolean);
+      const skills = linesToArray(state.skills);
+      const langs = linesToArray(state.languages);
+      const hobbies = linesToArray(state.hobbies);
+      return `
+        <div class="r t1" style="--t1-side:${templates.classicSplit.colors.side}">
+          <div class="main">
+            <div class="sec">
+              <div class="sec-title">PROFILE</div>
+              <div class="profile">${escapeHtml(state.profile)}</div>
+            </div>
+
+            <div class="sec">
+              <div class="sec-title">WORK EXPERIENCE</div>
+              ${renderExpClassic()}
+            </div>
+
+            <div class="thin-line"></div>
+
+            <div class="sec">
+              <div class="sec-title">EDUCATION</div>
+              ${renderEduClassic()}
+            </div>
+          </div>
+
+          <aside class="side">
+            ${makeAvatar()}
+            <div class="side-name">${escapeHtml(state.name || 'Your Name')}</div>
+            <div class="side-role">${escapeHtml(state.title || 'Software Engineer')}</div>
+
+            <div class="side-sec">
+              <div class="side-head">CONTACT</div>
+              <ul class="side-list">${contact.map(item => `<li><span>${escapeHtml(item)}</span></li>`).join('')}</ul>
+            </div>
+
+            <div class="side-sec">
+              <div class="side-head">SKILLS</div>
+              <ul class="side-list">${skills.map(item => `<li><span>${escapeHtml(item)}</span></li>`).join('')}</ul>
+            </div>
+
+            <div class="side-sec">
+              <div class="side-head">LANGUAGES</div>
+              <ul class="side-list">${langs.map(item => `<li><span>${escapeHtml(item)}</span></li>`).join('')}</ul>
+            </div>
+
+            <div class="side-sec">
+              <div class="side-head">HOBBIES</div>
+              <ul class="side-list">${hobbies.map(item => `<li><span>${escapeHtml(item)}</span></li>`).join('')}</ul>
+            </div>
+          </aside>
+        </div>`;
+    }
+
+    function templateExecutiveTop(){
+      const skills = linesToArray(state.skills);
+      const langs = linesToArray(state.languages);
+      const hobbies = linesToArray(state.hobbies);
+      const contact = [state.phone, state.email, state.address].filter(Boolean);
+
+      const exp = state.experience.map(item => {
+        const bullets = linesToArray(item.bullets).map(b => `<li>${escapeHtml(b)}</li>`).join('');
+        return `
+          <div class="entry">
+            <div class="entry-title">${escapeHtml(item.title || '')}</div>
+            <div class="date">${escapeHtml(item.date || '')}</div>
+            <ul class="bullets">${bullets || '<li>-</li>'}</ul>
+          </div>`;
+      }).join('');
+
+      const edu = state.education.map(item => `
+        <div class="edu">
+          <strong>${escapeHtml(item.degree || '')}</strong>
+          <span>${escapeHtml(item.meta || '')}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="r t2" style="--t2-main:${templates.executiveTop.colors.main}">
+          <div class="hero">
+            <div class="hero-grid">
+              ${makeAvatar()}
+              <div class="name-wrap">
+                <div class="name">${escapeHtml(state.name || 'Your Name')}</div>
+                <div class="role">${escapeHtml(state.title || 'Software Engineer')}</div>
+              </div>
+              <div class="contact">
+                ${contact.map(item => `<div>${escapeHtml(item)}</div>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="body">
+            <div>
+              <div class="card">
+                <div class="head">PROFILE</div>
+                <div class="profile">${escapeHtml(state.profile)}</div>
+              </div>
+
+              <div class="card">
+                <div class="head">WORK EXPERIENCE</div>
+                ${exp}
+              </div>
+            </div>
+
+            <div class="side-col">
+              <div class="card">
+                <div class="head">SKILLS</div>
+                <div class="tag-list">${renderTagList(skills)}</div>
+              </div>
+
+              <div class="card">
+                <div class="head">LANGUAGES</div>
+                <div class="tag-list">${renderTagList(langs)}</div>
+              </div>
+
+              <div class="card">
+                <div class="head">HOBBIES</div>
+                <div class="tag-list">${renderTagList(hobbies)}</div>
+              </div>
+
+              <div class="card">
+                <div class="head">EDUCATION</div>
+                ${edu}
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function templateTimelineRail(){
+      const skills = linesToArray(state.skills);
+      const langs = linesToArray(state.languages);
+      const hobbies = linesToArray(state.hobbies);
+      const contact = [state.phone, state.email, state.address].filter(Boolean);
+
+      const timeline = state.experience.map(item => {
+        const bullets = linesToArray(item.bullets).map(b => `<li>${escapeHtml(b)}</li>`).join('');
+        return `
+          <div class="timeline-item">
+            <div class="timeline-title">${escapeHtml(item.title || '')}</div>
+            <div class="timeline-date">${escapeHtml(item.date || '')}</div>
+            <ul>${bullets || '<li>-</li>'}</ul>
+          </div>`;
+      }).join('');
+
+      const edu = state.education.map(item => `
+        <div class="edu-item">
+          <strong>${escapeHtml(item.degree || '')}</strong>
+          <span>${escapeHtml(item.meta || '')}</span>
+        </div>`).join('');
+
+      return `
+        <div class="r t3" style="--t3-rail:${templates.timelineRail.colors.rail}">
+          <aside class="rail">
+            <div class="rail-wrap">
+              ${makeAvatar()}
+              <div class="rail-label">IRAQ PROJECT RESUME</div>
+            </div>
+          </aside>
+
+          <div class="content">
+            <div class="top">
+              <div class="title-wrap">
+                <div class="name">${escapeHtml(state.name || 'Your Name')}</div>
+                <div class="role">${escapeHtml(state.title || 'Software Engineer')}</div>
+              </div>
+            </div>
+
+            <div class="summary">${escapeHtml(state.profile)}</div>
+
+            <div class="meta-grid">
+              <div class="meta-card">
+                <div class="meta-head">CONTACT</div>
+                ${contact.map(item => `<div>${escapeHtml(item)}</div>`).join('')}
+              </div>
+              <div class="meta-card">
+                <div class="meta-head">SKILLS</div>
+                <ul>${renderSimpleList(skills)}</ul>
+              </div>
+              <div class="meta-card">
+                <div class="meta-head">LANGUAGES / HOBBIES</div>
+                <ul>${renderSimpleList([...langs, ...hobbies])}</ul>
+              </div>
+            </div>
+
+            <div class="bottom">
+              <div class="section">
+                <div class="section-title">WORK EXPERIENCE</div>
+                <div class="timeline">${timeline}</div>
+              </div>
+
+              <div class="stack">
+                <div class="section">
+                  <div class="section-title">EDUCATION</div>
+                  ${edu}
+                </div>
+                <div class="section">
+                  <div class="section-title">HOBBIES</div>
+                  <ul>${renderSimpleList(hobbies)}</ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function templatePremiumCards(){
+      const skills = linesToArray(state.skills);
+      const langs = linesToArray(state.languages);
+      const hobbies = linesToArray(state.hobbies);
+      const contact = [state.phone, state.email, state.address].filter(Boolean);
+
+      const exp = state.experience.map(item => {
+        const bullets = linesToArray(item.bullets).map(b => `<li>${escapeHtml(b)}</li>`).join('');
+        return `
+          <div class="exp">
+            <div class="exp-title">${escapeHtml(item.title || '')}</div>
+            <div class="exp-date">${escapeHtml(item.date || '')}</div>
+            <ul>${bullets || '<li>-</li>'}</ul>
+          </div>`;
+      }).join('');
+
+      const edu = state.education.map(item => `
+        <div class="edu-item">
+          <strong>${escapeHtml(item.degree || '')}</strong>
+          <span>${escapeHtml(item.meta || '')}</span>
+        </div>`).join('');
+
+      return `
+        <div class="r t4" style="--t4-band:${templates.premiumCards.colors.band}">
+          <div class="top-card">
+            ${makeAvatar()}
+            <div class="name-wrap">
+              <div class="name">${escapeHtml(state.name || 'Your Name')}</div>
+              <div class="role">${escapeHtml(state.title || 'Software Engineer')}</div>
+            </div>
+            <div class="contact-wrap">
+              ${contact.map(item => `<div>${escapeHtml(item)}</div>`).join('')}
+            </div>
+          </div>
+
+          <div class="body">
+            <div>
+              <div class="box">
+                <div class="box-head">
+                  <div class="box-title">PROFILE</div>
+                  <div class="chip">A4</div>
+                </div>
+                <div class="profile">${escapeHtml(state.profile)}</div>
+              </div>
+
+              <div class="box">
+                <div class="box-head">
+                  <div class="box-title">WORK EXPERIENCE</div>
+                  <div class="chip">${state.experience.length} ITEMS</div>
+                </div>
+                ${exp}
+              </div>
+
+              <div class="box">
+                <div class="box-head">
+                  <div class="box-title">EDUCATION</div>
+                  <div class="chip">${state.education.length} ITEMS</div>
+                </div>
+                ${edu}
+              </div>
+            </div>
+
+            <div>
+              <div class="box">
+                <div class="box-head">
+                  <div class="box-title">SKILLS</div>
+                  <div class="chip">KEY</div>
+                </div>
+                <div class="skill-grid">${renderSkillGrid(skills)}</div>
+              </div>
+
+              <div class="box">
+                <div class="box-head">
+                  <div class="box-title">LANGUAGES</div>
+                  <div class="chip">INFO</div>
+                </div>
+                <ul class="lang-list">${renderSimpleList(langs)}</ul>
+              </div>
+
+              <div class="box">
+                <div class="box-head">
+                  <div class="box-title">HOBBIES</div>
+                  <div class="chip">LIFE</div>
+                </div>
+                <ul class="hobby-list">${renderSimpleList(hobbies)}</ul>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderResume(){
+      const map = {
+        classicSplit: templateClassicSplit,
+        executiveTop: templateExecutiveTop,
+        timelineRail: templateTimelineRail,
+        premiumCards: templatePremiumCards
+      };
+      resumePage.innerHTML = map[state.template]();
+      renderMiniPhoto();
+    }
+
+    function bindFormInputs(){
+      Object.entries(inputs).forEach(([key, el]) => {
+        if(key === 'photo') return;
+        el.value = state[key] || '';
+        el.addEventListener('input', () => {
+          state[key] = el.value;
+          persist();
+          renderResume();
+        });
+      });
+    }
+
+    function buildExperienceCard(item, index){
+      const tpl = document.getElementById('experienceTemplate').content.firstElementChild.cloneNode(true);
+      tpl.querySelectorAll('[data-key]').forEach(input => {
+        const key = input.dataset.key;
+        input.value = item[key] || '';
+        input.addEventListener('input', () => {
+          state.experience[index][key] = input.value;
+          persist();
+          renderResume();
+        });
+      });
+      tpl.querySelector('.remove-card').addEventListener('click', () => {
+        if(state.experience.length === 1) return;
+        state.experience.splice(index,1);
+        persist();
+        renderForms();
+        renderResume();
+      });
+      return tpl;
+    }
+
+    function buildEducationCard(item, index){
+      const tpl = document.getElementById('educationTemplate').content.firstElementChild.cloneNode(true);
+      tpl.querySelectorAll('[data-key]').forEach(input => {
+        const key = input.dataset.key;
+        input.value = item[key] || '';
+        input.addEventListener('input', () => {
+          state.education[index][key] = input.value;
+          persist();
+          renderResume();
+        });
+      });
+      tpl.querySelector('.remove-card').addEventListener('click', () => {
+        if(state.education.length === 1) return;
+        state.education.splice(index,1);
+        persist();
+        renderForms();
+        renderResume();
+      });
+      return tpl;
+    }
+
+    function renderForms(){
+      experienceForm.innerHTML = '';
+      state.experience.forEach((item, index) => experienceForm.appendChild(buildExperienceCard(item, index)));
+
+      educationForm.innerHTML = '';
+      state.education.forEach((item, index) => educationForm.appendChild(buildEducationCard(item, index)));
+    }
+
+    document.getElementById('addExperienceBtn').addEventListener('click', () => {
+      state.experience.push({ date:'', title:'', bullets:'' });
+      persist();
+      renderForms();
+      renderResume();
+    });
+
+    document.getElementById('addEducationBtn').addEventListener('click', () => {
+      state.education.push({ degree:'', meta:'' });
+      persist();
+      renderForms();
+      renderResume();
+    });
+
+    inputs.photo.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.photo = reader.result;
+        persist();
+        renderResume();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    async function downloadPdf(){
+      const btn = document.getElementById('downloadPdfBtn');
+      const oldText = btn.textContent;
+      btn.textContent = 'جاري إنشاء PDF...';
+      btn.disabled = true;
+
+      try{
+        if(typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined'){
+          throw new Error('PDF libraries not loaded');
+        }
+
+        const page = document.getElementById('resumePage');
+        const canvas = await html2canvas(page, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = 210;
+        const pdfHeight = 297;
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, '', 'FAST');
+        const safeName = (state.name || 'resume').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'resume';
+        pdf.save(`${safeName}.pdf`);
+      }catch(err){
+        alert('تعذر تنزيل PDF مباشرة. تأكد من فتح الملف مع اتصال إنترنت ليتم تحميل مكتبات PDF، أو استخدم زر الطباعة.');
+        console.error(err);
+      }finally{
+        btn.textContent = oldText;
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      state = structuredClone(defaults);
+      localStorage.removeItem(STORAGE_KEY);
+      init();
+    });
+
+    function init(){
+      renderTemplateChooser();
+      bindFormInputs();
+      renderForms();
+      renderResume();
+    }
+
+    init();
+  </script>
+</body>
+</html>

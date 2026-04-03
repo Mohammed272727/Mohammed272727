@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>عرض الملف</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      overflow: hidden;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: rgba(255,255,255,.96);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+
+    .btn {
+      border: none;
+      background: #111;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn.light {
+      background: #fff;
+      color: #111;
+      border: 1px solid #ddd;
+    }
+
+    .viewer-wrap {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #eaeaea;
+    }
+
+    iframe, embed, object {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .hidden { display: none; }
+
+    .message {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+      background: #fff;
+      color: #111;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <button class="btn light" onclick="history.back()">رجوع</button>
+    <button class="btn" onclick="showPDF()">عرض PDF</button>
+    <button class="btn" onclick="showPPTX()">عرض PPTX</button>
+    <button class="btn" onclick="openOriginal()">فتح الملف</button>
+    <button class="btn" onclick="downloadFile()">تنزيل</button>
+    <button class="btn" onclick="toggleFullScreen()">ملء الشاشة</button>
+  </div>
+
+  <div class="viewer-wrap" id="viewerWrap">
+    <iframe id="pdfFrame" src="1.pdf"></iframe>
+
+    <iframe id="pptxFrame" class="hidden"></iframe>
+
+    <div class="message" id="msg">
+      <div>تعذر العرض المباشر.</div>
+      <div>استخدم فتح الملف أو تنزيله.</div>
+      <div>
+        <button class="btn" onclick="openOriginal()">فتح الملف</button>
+        <button class="btn" onclick="downloadFile()">تنزيل</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pdfFrame = document.getElementById('pdfFrame');
+    const pptxFrame = document.getElementById('pptxFrame');
+    const msg = document.getElementById('msg');
+
+    function hideAll() {
+      pdfFrame.classList.add('hidden');
+      pptxFrame.classList.add('hidden');
+      msg.style.display = 'none';
+    }
+
+    function showPDF() {
+      hideAll();
+      pdfFrame.classList.remove('hidden');
+      pdfFrame.src = '1.pdf';
+    }
+
+    function showPPTX() {
+      hideAll();
+
+      const isOnline = location.protocol.startsWith('http');
+      if (!isOnline) {
+        msg.style.display = 'flex';
+        return;
+      }
+
+      const fileUrl = encodeURIComponent(location.origin + location.pathname.replace(/\/[^\/]*$/, '/') + '1.pptx');
+      pptxFrame.src = 'https://view.officeapps.live.com/op/embed.aspx?src=' + fileUrl;
+      pptxFrame.classList.remove('hidden');
+
+      setTimeout(() => {
+        // fallback if needed
+      }, 3000);
+    }
+
+    function openOriginal() {
+      window.open('1.pptx', '_blank');
+    }
+
+    function downloadFile() {
+      const a = document.createElement('a');
+      a.href = '1.pptx';
+      a.download = '1.pptx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function toggleFullScreen() {
+      const el = document.documentElement;
+      if (!document.fullscreenElement) {
+        el.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
+    }
+
+    // الافتراضي: PDF لأنه الأضمن
+    showPDF();
+  </script>
+</body>
+</html>
